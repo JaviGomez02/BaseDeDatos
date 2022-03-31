@@ -1,0 +1,53 @@
+CREATE TABLE EQUIPOS
+(CodEquipo VARCHAR2(4),
+Nombre VARCHAR2(30) NOT NULL,
+Localidad VARCHAR2(15),
+CONSTRAINT pk_equipos PRIMARY KEY (CodEquipo)
+);
+
+CREATE TABLE JUGADORES
+(CodJugador VARCHAR2(4),
+Nombre VARCHAR2(30) NOT NULL,
+Fecha_Nacimiento DATE,
+Demarcacion VARCHAR2(10),
+CodEquipo VARCHAR2(4),
+CONSTRAINT pk_jugadores PRIMARY KEY (CodJugador),
+CONSTRAINT fk_jugadores FOREIGN KEY (CodEquipo) REFERENCES EQUIPOS(CodEquipo)
+);
+
+CREATE TABLE PARTIDOS
+(CodPartido VARCHAR2(4),
+CodEquipoLocal VARCHAR2(4),
+CodEquipoVisitante VARCHAR2(4),
+Fecha DATE,
+Competicion VARCHAR2(4),
+Jornada VARCHAR2(20),
+CONSTRAINT pk_partidos PRIMARY KEY (CodPartido),
+CONSTRAINT fk1_partidos FOREIGN KEY (CodEquipoLocal) REFERENCES EQUIPOS(CodEquipo),
+CONSTRAINT fk2_partidos FOREIGN KEY (CodEquipoVisitante) REFERENCES EQUIPOS(CodEquipo),
+CONSTRAINT condicion_fecha CHECK ((EXTRACT(MONTH FROM fecha) NOT IN (7,8))),
+CONSTRAINT condicion_competicion CHECK (Competicion IN ('COPA','LIGA'))
+);
+
+CREATE TABLE INCIDENCIAS
+(NumIncidencia VARCHAR2(6),
+CodPartido VARCHAR2(4),
+CodJugador VARCHAR2(4),
+Minuto NUMBER(2),
+Tipo VARCHAR2(20),
+CONSTRAINT pk_incidencias PRIMARY KEY (NumIncidencia),
+CONSTRAINT fk1_incidencias FOREIGN KEY (CodPartido) REFERENCES PARTIDOS(CodPartido),
+CONSTRAINT fk2_incidencias FOREIGN KEY (CodJugador) REFERENCES JUGADORES(CodJugador),
+CONSTRAINT condicion_minuto CHECK (Minuto BETWEEN 1 AND 100)
+);
+
+
+ALTER TABLE JUGADORES ADD CONSTRAINT CH JUG NOM CHECK (Nombre=INITCAP(Nombre));
+
+ALTER TABLE JUGADORES ADD CONSTRAINT CH_JUG_DEM CHECK (Demarcacion IN ('Portero','Defensa','Medio','Delantero'));
+
+ALTER TABLE EQUIPOS ADD CONSTRAINT CH_EQ_NOMBRE CHECK (regexp_like(nombre,'^[0-9]{1}'));
+
+ALTER TABLE INCIDENCIAS MODIFY tipo NOT NULL;
+
+ALTER TABLE EQUIPOS ADD GolesMarcados NUMBER(3)
